@@ -1,0 +1,27 @@
+{
+  "name": "shortener",
+  "version": "1.0.0",
+  "description": "URL shortener",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yellyoshua/shortener.git"
+  },
+  "devDependencies": {
+    "standard": "latest"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yellyoshua/shortener/issues"
+  },
+  "homepage": "https://github.com/yellyoshua/shortener#readme"
+}
