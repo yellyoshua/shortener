@@ -1,92 +1,16 @@
 /* global addEventListener, URLS, Response, AUTH_SECRET  */
 const domain = 'https://short.yoshualopez.com/';
-const createIndexHtml = ({ allKeys }) => `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<link rel="shortcut icon" href="https://yoshualopez.com/favicon.ico" type="image/x-icon">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ Short your urls 🔗</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+import HTML from './index.html';
 
-    body {
-      display: grid;
-      place-content: center;
-    }
+const renderHTML = (allKeys = []) => {
+  const data = allKeys.map(({hash, link}) => {
+    const shortLink = domain+hash;
+ 
+    return {hash, shortLink, link};
+  });
 
-    main {
-      display: grid;
-      place-content: center;
-      min-height: 100vh;
-    }
-
-    div {
-      display: flex;
-    }
-
-    [full-width] {
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>Your URL shortener 🔗</h1>
-    <h2>Create a short url</h2>
-    <form>
-      <input full-width required id='link' placeholder='Shorten your link'>
-      <div>
-        <input id='hash' placeholder='Hash to use for the link'>
-        <input id='auth' required placeholder='Auth Code' type='password' />
-      </div>
-      <button full-width>Shorten 🗜️!</button>
-    </form>
-    <div id="result"></div>
-    <h2>Already used URLs</h2>
-    <strong>
-    ${allKeys.map(key => {
-      const link = domain+key;
-      return `<a href="${link}" target="_blank" rel="noopener">
-        ${key}
-      <a/><br />`
-    }).join('')}
-    </strong>
-  </main>
-  <script>
-    const $ = el => document.querySelector(el)
-    const $form = $('form')
-    const $result = $('#result')
-
-    $form.addEventListener('submit', event => {
-      event.preventDefault()
-      const auth = $('#auth').value
-      const hash = $('#hash').value
-      const link = $('#link').value
-
-      fetch(\`/\${hash}\`, {
-        method: 'POST',
-        headers: {
-          Authorization: auth,
-          'X-Destination': link 
-        }
-      }).then(res => {
-        const text = res.ok
-          ? '✅ Created shorten URL!'
-          : '❌ Something went BAD!'
-
-        $result.innerText = text
-      })
-    })
-  </script>
-</body>
-</html>
-`
+  return HTML.replace('{{__DATA__}}', JSON.stringify(data));
+};
 
 /**
  * TODO:
@@ -130,14 +54,27 @@ const handleDelete = async ({ hash }) => {
   return respondWith({ status: 204 })
 }
 
-const handleUpdate = async () => {
+const handleUpdate = async ({ hash, headers }) => {
+  const previousDestination = await SHORTS.get(hash)
+  if (!previousDestination) respondWith({ status: 401 })
 
+  const destination = headers.get('x-destination')
+  await SHORTS.put(hash, destination)
+  return respondWith({ status: 201 })
 }
 
 const renderUI = async () => {
-  const { keys } = await SHORTS.list()
-  const allKeys = keys.map(key => key.name)
-  const body = createIndexHtml({ allKeys })
+  const { keys, ...rest } = await SHORTS.list()
+
+  const allKeys = await Promise.all(
+    keys.map(async (key) => {
+      const hash = key.name;
+      const link = await SHORTS.get(hash)
+      return { hash, link };
+    })
+  );
+
+  const body = renderHTML(allKeys)
 
   return respondWith({ body })
 }
@@ -172,8 +109,8 @@ async function handleRequest (request) {
     return checkAuth({ auth }, () => handleDelete({ hash }))
   }
 
-  if (['PUT', 'PATCH'].includes(method)) {
-    return checkAuth({ auth }, () => handleUpdate({ hash }))
+  if (['PUT'].includes(method)) {
+    return checkAuth({ auth }, () => handleUpdate({ hash, headers }))
   }
 
   return respondWith({ status: 405 })
