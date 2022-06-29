@@ -1,4 +1,5 @@
 /* global addEventListener, URLS, Response, AUTH_SECRET  */
+const domain = 'https://short.yoshualopez.com/';
 const createIndexHtml = ({ allKeys }) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +49,14 @@ const createIndexHtml = ({ allKeys }) => `
     </form>
     <div id="result"></div>
     <h2>Already used URLs</h2>
-    <strong>${allKeys.map(key => `${key}<br />`).join('')}</strong>
+    <strong>
+    ${allKeys.map(key => {
+      const link = domain+key;
+      return `<a href="${link}" target="_blank" rel="noopener">
+        ${key}
+      <a/><br />`
+    }).join('')}
+    </strong>
   </main>
   <script>
     const $ = el => document.querySelector(el)
@@ -85,7 +93,6 @@ const createIndexHtml = ({ allKeys }) => `
  * - Hacer un frontend para todo esto
  * - Implementar el método PUT
  * - Poder sobreescribir en el POST si ya existe con un flag.
- * - Revisar los environments para el worker (https://developers.cloudflare.com/workers/platform/environments)
  */
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
