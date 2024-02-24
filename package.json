@@ -2,18 +2,15 @@
   "name": "shortener",
   "version": "1.0.0",
   "description": "URL shortener",
-  "main": "index.js",
+  "main": "src/app.ts",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yellyoshua/shortener.git"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20240222.0",
-    "standard": "latest"
+    "standard": "latest",
+    "wrangler": "^3.0.0"
   },
   "eslintConfig": {
     "extends": "./node_modules/standard/eslintrc.json"

@@ -7,6 +7,6 @@ account_id = "29290f0059a332e257b2d87799eff855"
 route = "short.yoshualopez.com/*"
 
 
-kv_namespaces = [
-  { binding = "SHORTS", id = "c14d521785e44dd8a06d9efdcb95e10e" }
-]
+[[kv_namespaces]]
+binding = "SHORTS"
+id = "c14d521785e44dd8a06d9efdcb95e10e"
