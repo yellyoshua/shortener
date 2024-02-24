@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<link rel="shortcut icon" href="https://yoshualopez.com/favicon.ico" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Short your urls 🔗</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    * {
+      box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+    }
+
+		#list {
+			display: flex;
+    	flex-direction: column;
+		}
+
+		.custom-button {
+			padding: 3px;
+			margin-left: 3px;
+			margin-right: 3px;
+			font-size: 13px;
+		}
+
+    div {
+      display: flex;
+    }
+
+		@media screen and (max-width: 430px) {
+			div {
+				flex-direction: column;
+			}
+		}
+
+    [full-width] {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+	<main>
+		<h1>Your URL shortener 🔗</h1>
+    <h2>Create a short url</h2>
+    <form>
+      <input full-width required id='link' placeholder='Shorten your link'>
+      <div full-width>
+				<input id='hash' full-width placeholder='Hash to use for the link'>
+        <input id='auth' full-width required placeholder='Auth Code' type='password' />
+      </div>
+      <button full-width>Shorten 🗜️!</button>
+    </form>
+    <div id="result"></div>
+    <h2>Already used URLs</h2>
+    <section id="list" full-width></section>
+  </main>
+</body>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+	const $ = el => document.querySelector(el);
+	const $form = $('form');
+	const $result = $('#result');
+	const createElement = React.createElement;
+	const useState = React.useState;
+
+	const list = JSON.parse('{{__DATA__}}');
+	
+	const LinkItem = ({ hash, shortLink, link }) => {
+		const [editable, setEditable] = useState(false);
+		const [currentLink, setCurrentLink] = useState(link);
+		const [auth, setAuth] = useState('');
+
+		const toggleEditable = () => {
+			return setEditable(!editable);
+		}
+
+		const updateItem = () => {
+			return fetch(`/${hash}`, {
+				method: 'PUT',
+				headers: {Authorization: auth},
+        body: JSON.stringify({ destination: link })
+			}).then(() => {
+				setEditable(false);
+				window.location.reload();
+			});
+		}
+
+		const renderLink = (item) => {
+			return createElement('a',
+				{href: shortLink},
+				hash
+			);
+		}
+
+		if (editable) {
+			return createElement('div',
+			{
+				style: {display: 'flex'}
+			},
+			[
+				createElement('input', {
+					type: 'text',
+					style: {flex: 1},
+					placeholder: 'Short Link',
+					value: currentLink,
+					onChange: e => setCurrentLink(e.target.value)
+				}),
+				createElement('input', {
+					type: 'password',
+					placeholder: 'Auth Code',
+					value: auth,
+					onChange: e => setAuth(e.target.value)
+				}),
+				createElement('button', {
+					onClick: updateItem,
+					className: 'custom-button'
+				}, 'Update ✅'),
+				createElement('button', {
+					onClick: toggleEditable,
+					className: 'custom-button'
+				}, 'Cancel ❌')
+			]);
+		}
+
+		return createElement(
+			'strong',
+			{
+				style: {
+					display: 'flex',
+					justifyContent: 'space-between'
+				},
+			},
+			[
+				renderLink(),
+				createElement('button', {
+					onClick: toggleEditable,
+					className: 'custom-button'
+				}, '✏️')
+			]
+		)
+	}
+
+	const LinkList = () => {
+		return list.map(item => {
+			return LinkItem(item);
+		})
+	};
+
+	$form.addEventListener('submit', event => {
+		event.preventDefault()
+		const auth = $('#auth').value
+		const hash = $('#hash').value
+		const link = $('#link').value
+
+		fetch(`/${hash}`, {
+			method: 'POST',
+			headers: {Authorization: auth},
+      body: JSON.stringify({ destination: link })
+		}).then(res => {
+			const text = res.ok
+				? '✅ Created shorten URL!'
+				: '❌ Something went BAD!'
+
+			$result.innerText = text
+		})
+	})
+
+	const root = ReactDOM.createRoot(document.querySelector('#list'));
+	root.render(createElement(LinkList));
+</script>
+</html>

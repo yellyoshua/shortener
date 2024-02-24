@@ -12,6 +12,7 @@
     "url": "git+https://github.com/yellyoshua/shortener.git"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20240222.0",
     "standard": "latest"
   },
   "eslintConfig": {
@@ -23,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/yellyoshua/shortener/issues"
   },
-  "homepage": "https://github.com/yellyoshua/shortener#readme"
+  "homepage": "https://github.com/yellyoshua/shortener#readme",
+  "dependencies": {
+    "hono": "4.0.5"
+  }
 }

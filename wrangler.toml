@@ -1,6 +1,6 @@
 name = "urlshortener"
 
-main = "index.mjs"
+main = "src/app.ts"
 compatibility_date = "2022-05-28"
 workers_dev = true
 account_id = "29290f0059a332e257b2d87799eff855"
